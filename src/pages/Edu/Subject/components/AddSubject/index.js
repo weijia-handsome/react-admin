@@ -1,7 +1,14 @@
 import React, { Component } from 'react'
-import {Link} from 'react-router-dom'
-import { Form, Select, Card, Input, Button } from 'antd'
+import { Link } from 'react-router-dom'
+import { Form, Select, Card, Input, Button, message } from 'antd'
 import { ArrowLeftOutlined } from '@ant-design/icons'
+import { connect } from 'react-redux'
+
+import { getSubjectList } from '../../redux'
+
+import { reqGetSubjectList, reqAddSubjectList } from '@api/edu/subject'
+
+import './index.less'
 
 //表单布局属性
 const layout = {
@@ -26,7 +33,48 @@ const onFinishFailed = errorInfo => {
 
 // 获取Option组件
 const Option = Select.Option
-export default class index extends Component {
+@connect(
+    state => ({
+        subjectlist: state.subjectlist
+    }), { getSubjectList }
+)
+class AddSubject extends Component {
+    state = {
+        subjectlist: {
+            total: 0,
+            items: []
+        }
+    }
+    page = 1
+    async componentDidMount() {
+        // console.log(this.props);
+
+        // this.props.getSubjectList(1, 10)
+        const res = await reqGetSubjectList(this.page++, 10)
+        this.setState({
+            subjectlist: res
+        })
+    }
+    handleloadMore = async () => {
+        const res = await reqGetSubjectList(this.page++, 10)
+        const newItems = [...this.state.subjectlist.items, ...res.items]
+
+        this.setState({
+            subjectList: {
+                total: res.total,
+                items: newItems
+            }
+        })
+    }
+    onFinish = async values => {
+        try {
+            await reqAddSubjectList(values.subjectname, values.parentid)
+            message.success('课程分类添加成功')
+            this.props.history.push('/edu/subject/list')
+        } catch{
+            message.error('课程分类添加失败')
+        }
+    }
     render() {
         return (
             <Card
@@ -35,15 +83,15 @@ export default class index extends Component {
                         <Link to='/edu/subject/list'>
                             <ArrowLeftOutlined />
                         </Link>
-                        <span className='title'>新增课程</span>
+                        <span className='add-subject'>新增课程</span>
                     </>
                 }
             >
                 <Form
                     {...layout}
                     name='subject'
-                    onFinish={onFinish}
-                    onFinishFailed={onFinishFailed}
+                    onFinish={this.onFinish}
+                // onFinishFailed={onFinishFailed}
                 >
                     <Form.Item
                         label='课程分类名称'
@@ -68,10 +116,30 @@ export default class index extends Component {
                             }
                         ]}
                     >
-                        <Select>
-                            <Option value={1}>
+                        <Select
+                            dropdownRender={menu => {
+                                return (
+                                    <>
+                                        {menu}
+                                        {this.state.subjectList.total > this.state.subjectList.items.length && (
+                                            <Button type='link' onClick={this.handleloadMore}>
+                                                加载更多数据
+                                            </Button>
+
+                                        )}
+                                    </>
+                                )
+                            }}
+                        >
+
+                            <Option value={0} key={0}>
                                 {'一级菜单'}
                             </Option>
+                            {this.props.subjectlist.items.map(subject => {
+                                return (
+                                    <Option value={subject._id} key={subject._id}>{subject.title}</Option>
+                                )
+                            })}
                         </Select>
                     </Form.Item>
 
@@ -85,3 +153,4 @@ export default class index extends Component {
         )
     }
 }
+export default AddSubject
