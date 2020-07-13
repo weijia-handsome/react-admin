@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
-// 导入antd组件
-import { Button, Table } from 'antd'
+// 导入antd组件 
+import { Button, Table, Tooltip, Input, message, Modal } from 'antd'
 // 导入antd-图标
-import { PlusOutlined, DeleteOutlined, FormOutlined } from '@ant-design/icons'
+import { PlusOutlined, DeleteOutlined, FormOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
 
 // 导入connect
 import { connect } from 'react-redux'
@@ -11,79 +11,31 @@ import { connect } from 'react-redux'
 // import { reqGetSubjectList } from '@api/edu/subject'
 
 // 导入redux中的异步anction
-import { getSubjectList, getSecSubjectList } from './redux'
+import { getSubjectList, getSecSubjectList, updateSubject, subjectList } from './redux'
+//导入删除课程分类数据的方法
+import { reqDelSubject } from '@api/edu/subject'
 
 //导入样式文件
 import './index.less'
 
-const columns = [
-  // columns 定义表格的列
-  // title属性: 表示列的名称
-  // dataIndex决定: 这一列展示的是data中哪一项的数据
-  { title: '分类名称', dataIndex: 'title', key: 'title' },
-
-  {
-    title: '操作',
-    dataIndex: '', //表示这一列不渲染data里的数据
-    key: 'x',
-    // 自定义这一列要渲染的内容
-    render: () => (
-      <>
-        <Button type='primary' className='update-btn'>
-          <FormOutlined />
-        </Button>
-        <Button type='danger'>
-          <DeleteOutlined />
-        </Button>
-      </>
-    ),
-    // 设置这一列的宽度
-    width: 200
-  }
-]
-
-const data = [
-  {
-    key: 1,
-    name: 'John Brown',
-    age: 32,
-    address: 'New York No. 1 Lake Park',
-    description:
-      'My name is John Brown, I am 32 years old, living in New York No. 1 Lake Park.'
-  },
-  {
-    key: 2,
-    name: 'Jim Green',
-    age: 42,
-    address: 'London No. 1 Lake Park',
-    description:
-      'My name is Jim Green, I am 42 years old, living in London No. 1 Lake Park.'
-  },
-  {
-    key: 3,
-    name: 'Not Expandable',
-    age: 29,
-    address: 'Jiangsu No. 1 Lake Park',
-    description: 'This not expandable'
-  },
-  {
-    key: 4,
-    name: 'Joe Black',
-    age: 32,
-    address: 'Sidney No. 1 Lake Park',
-    description:
-      'My name is Joe Black, I am 32 years old, living in Sidney No. 1 Lake Park.'
-  }
-]
+const { confirm } = Modal
 // {subjectList: {total:0, items: []}}
 @connect(
   state => ({ subjectList: state.subjectList }),
   // 这里传入的是一个异步action.但是在展示组件中使用的函数,是通过connect进行封装之后的,虽然函数名一样,但是并不是同一个函数
-  { getSubjectList, getSecSubjectList }
+  { getSubjectList, getSecSubjectList, updateSubject }
 )
 class Subject extends Component {
   // 直接给当前组件实例,添加currentPage属性,表示当前是第几页
   currentPage = 1
+
+  state = {
+    // subjectId的作用:
+    // 1. 如果subjectId没有表示表格每一行直接展示课程分类的title,如果有值(应该就是要修改数据的id), 就展示input
+    // 2. 修改数据需要subjectid
+    subjectId: '',
+    subjectTitle: '' //用于设置受控组件
+  }
 
   componentDidMount() {
     // this.getSubjectList(1, 10)
@@ -138,8 +90,165 @@ class Subject extends Component {
       this.props.getSecSubjectList(record._id)
     }
   }
+
+  // 点击更新按钮的事件处理函数
+  handleUpdateClick = value => {
+    //修改subjectid
+    return () => {
+      // console.log(value)
+      this.setState({
+        subjectId: value._id,
+        subjectTitle: value.title
+      })
+    }
+  }
+
+  // 修改数据时,受控组件input的change回调函数
+  handleTitleChange = e => {
+    this.setState({
+      subjectTitle: e.target.value
+    })
+  }
+
+  // 取消按钮的事件处理函数
+  handleCancle = () => {
+    this.setState({
+      subjectId: '',
+      subjectTitle: ''
+    })
+  }
+
+  // 更新确认按钮的事件处理函数
+  handleUpdate = async () => {
+    let { subjectId, subjectTitle } = this.state
+
+    // 手动调用取消按钮的事件处理函数,让表格行展示内容
+    this.handleCancle = () => {
+      this.setState({
+        subjectId: '',
+        subjectTitle: ''
+      })
+    }
+    // let {  subjectTitle } = this.state
+    if (subjectTitle.length === 0) {
+      message.error('课程分类名称不能为空')
+      return
+    }
+    if(this.oldSubjectTitle === subjectTitle){
+      message.error('课程分类名称不能和之前的相同')
+      return
+    }
+    await this.props.updateSubject(subjectTitle, subjectId)
+    message.success('更改成功')
+    //手动调用取消按钮的事件处理函数,让表格行展示内容
+    this.handleCancle()
+  }
+  //删除按钮
+  handleDel = value => () => {
+    confirm({
+      title: (
+        <>
+          <div>
+            确定要删除
+      <span style={{ color: 'red', fontSize: 30 }}>{value.title}</span>
+          </div>
+        </>
+      ),
+      icon: <ExclamationCircleOutlined />,
+      content: 'Some descriptions',
+      onOk: async () => {
+        // console.log('OK');
+        //真正去删除这条数据
+        await reqDelSubject(value._id)
+        message.success('删除成功了')
+        const totalPage = Math.ceil(
+          this.props.subjectList.total / this.pageSize
+        )
+        if(
+          this.currentPage !== 1 && totalPage === this.currentPage
+        ) {
+          this.props.getSubjectList(--this.currentPage, this.pageSize)
+        }
+      }
+    });
+  }
   render() {
-    console.log(this.props)
+    // 注意:这个columns必须写到render中,因为state变化,render会调用.这个columns才会重新执行
+    const columns = [
+      // columns 定义表格的列
+      // title属性: 表示列的名称
+      // dataIndex决定: 这一列展示的是data中哪一项的数据
+      {
+        title: '分类名称',
+        // dataIndex: 'title',
+        key: 'title',
+        render: value => {
+          //如果state里面存储的id 和 这一条数据的id相同,就展示input
+          // 由于第一页数据有10条,所以这个render的回调会执行10次
+          // 接收value是对饮的每一行数据
+          if (this.state.subjectId === value._id) {
+            return (
+              <Input
+                value={this.state.subjectTitle}
+                className='subject-input'
+                onChange={this.handleTitleChange}
+              />
+            )
+          }
+
+          return <span>{value.title}</span>
+        }
+      },
+
+      {
+        title: '操作',
+        dataIndex: '', //表示这一列不渲染data里的数据
+        key: 'x',
+        // 自定义这一列要渲染的内容
+        render: value => {
+          //判断当前数据的id是否和state里面subjectId的值是相同的,如果相同,展示确认和取消按钮,否则展示修改和删除按钮
+
+          if (this.state.subjectId === value._id) {
+            return (
+              <>
+                <Button
+                  type='primary'
+                  className='update-btn'
+                  onClick={this.handleUpdate}
+                >
+                  确认
+                </Button>
+                <Button type='danger' onClick={this.handleCancle} onClick={this.handleCancle}>
+                  取消
+                </Button>
+              </>
+            )
+          }
+          // if(this.state.subjectId === value._id){}
+          return (
+            <>
+              <Tooltip title='更新课程分类'>
+                <Button
+                  type='primary'
+                  className='update-btn'
+                  onClick={this.handleUpdateClick(value)}
+                >
+                  <FormOutlined />
+                </Button>
+              </Tooltip>
+              <Tooltip title='删除课程分类'>
+                <Button type='danger' onClick={this.handleDel(value)}>
+                  <DeleteOutlined />
+                </Button>
+              </Tooltip>
+            </>
+          )
+        },
+        // 设置这一列的宽度
+        width: 200
+      }
+    ]
+
     return (
       <div className='subject'>
         <Button

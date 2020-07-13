@@ -28,15 +28,38 @@ export function reqGetSecSubjectList(parentId) {
     method: 'GET'
   })
 }
-//添加课程分类
-export function reqAddSubjectList(title,parentId){
-  console.log(title,parentId);
+
+// 添加课程分类
+export function reqAddSubjectList(title, parentId) {
+  console.log(title, parentId)
+  // request返回一个promise
   return request({
-    url:`${BASE_URL}/save`,
-    method:'POST',
-    data:{
+    url: `${BASE_URL}/save`,
+    // http://localhost:8888/admin/edu/subject/1/10
+    method: 'POST',
+    data: {
       title,
       parentId
     }
+  })
+}
+
+// 定义修改课程分类title的方法
+export function reqUpdateSubjectList(title, id) {
+  // request返回一个promise
+  return request({
+    url: `${BASE_URL}/update`,
+    method: 'PUT',
+    data: {
+      title,
+      id
+    }
+  })
+}
+//定义删除改课程分类title的方法
+export function reqDelSubject(id){
+  return request({
+    url: `${BASE_URL}/remove/${id}`,
+    method: 'DELETE'
   })
 }
