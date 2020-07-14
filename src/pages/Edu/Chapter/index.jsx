@@ -91,12 +91,16 @@ class Chapter extends Component {
       selectedRowKeys,
     });
   };
-  handleClickExpand = (expand,record) => {
-    console.log(expand,record);
-    if(expand){
+  handleClickExpand = (expand, record) => {
+    console.log(expand, record);
+    if (expand) {
       //发送请求数据
       this.props.getLessonList(record._id)
     }
+  }
+  //点击跳转到新增课时页面
+  handleGoAddLesson = () => {
+    this.props.history.push('/edu/chapter/addlesson')
   }
   render() {
     const { previewVisible, previewImage, selectedRowKeys } = this.state;
@@ -121,9 +125,9 @@ class Chapter extends Component {
           if ("free" in data) {
             return (
               <div>
-                <Tooltip title="查看详情">
-                  <Button>
-                    <SettingOutlined />
+                <Tooltip title="新增课时">
+                  <Button type='primary' onClick={this.handleGoAddLesson}>
+                    <PlusOutlined />
                   </Button>
                 </Tooltip>
                 <Tooltip title="更新章节">
@@ -301,7 +305,7 @@ class Chapter extends Component {
             dataSource={data}
             rowKey="id"
             expandable={{
-              onExpand:this.handleClickExpand
+              onExpand: this.handleClickExpand
             }}
           />
         </div>

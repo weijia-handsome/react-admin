@@ -28,6 +28,8 @@ const AddSubject = () =>
 const Test = () => lazy(() => import('@pages/Edu/Test')) //这个test是测试用的
 const Settings = () => lazy(() => import('@pages/User/Settings'))
 const Center = () => lazy(() => import('@pages/User/Center'))
+const AddLesson = () =>
+  lazy(() => import('@pages/Edu/Chapter/components/AddLesson'))
 
 export default {
   Admin,
@@ -46,5 +48,6 @@ export default {
   Center,
   Test,
   Subject,
-  AddSubject
+  AddSubject,
+  AddLesson
 }
