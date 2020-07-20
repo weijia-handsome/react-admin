@@ -63,23 +63,30 @@ export default function subjectList(prevState = initSubjectList, action) {
         ...prevState
       }
 
-    
-
-      return {
-        ...prevState
-      }
     case UPDATE_SUBJECT:
-      prevState.item.forEach(subject => {
-        if(subject._id === action.data.id){
+      // 通过prevstate, 利用传过来的id.找到要修改的那条数据,然后修改title
+      // 1. 遍历prevState 是个对象 items中存储了所有的数据
+      // 注意: 修改的课程分类有可能是一级的,也有可能是二级的
+
+      prevState.items.forEach(subject => {
+        //传过来的id是不是一级课程分类
+        if (subject._id === action.data.id) {
+          // 修改title,然后return 掉
           subject.title = action.data.title
           return
         }
+
+        // 还要遍历这个一级课程分类下面的二级课程分类
         subject.children.forEach(secSubject => {
-          if(secSubject._id === action.data.id){
+          if (secSubject._id === action.data.id) {
             secSubject.title = action.data.title
           }
         })
       })
+
+      return {
+        ...prevState
+      }
     default:
       return prevState
   }

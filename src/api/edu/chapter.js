@@ -1,19 +1,27 @@
 import request from '@utils/request'
+
+// 请求路径不写主机名,会将这个路径和package.json中配置的代理proxy的主机名进行拼接
 const BASE_URL = '/admin/edu/chapter'
 
-// 现在要从mock上面获取数据,所以重新定义一个请求mock的路径
-// 这里有主机名,就不会和proxy拼接了
-// const MOCK_URL = `http://localhost:8888${BASE_URL}`
+// 获取所有课程数据
+export function reqGetChapterList({ page, limit, courseId }) {
+  // request返回一个promise
+  return request({
+    url: `${BASE_URL}/${page}/${limit}`,
+    method: 'GET',
+    params: {
+      courseId
+    }
+  })
+}
 
-// 获取课程分类
-export function reqGetChapterList({page, limit,courseId}) {
-    // request返回一个promise
-    return request({
-        url: `${BASE_URL}/${page}/${limit}`,
-        // http://localhost:8888/admin/edu/subject/1/10
-        method: 'GET',
-        params:{
-            courseId
-        }
-    })
+// 批量删除章节数据
+export function reqBatchDelChapter(chapterIds) {
+  return request({
+    url: `${BASE_URL}/batchRemove`,
+    method: 'DELETE',
+    data: {
+      idList: chapterIds
+    }
+  })
 }

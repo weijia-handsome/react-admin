@@ -1,13 +1,14 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import MyUpload from '../MyUpload'
 
 //导入antd组件
 import { Link } from 'react-router-dom'
-import { Card, Button, Form, Input, Switch, message } from 'antd'
-import { ArrowLeftOutlined } from '@ant-design/icons'
+import { Card, Button, Form, Input, Switch, message, Upload } from 'antd'
+import { ArrowLeftOutlined, UploadOutlined } from '@ant-design/icons'
 
+import MyUpload from '../MyUpload'
 import { reqAddLesson } from '@api/edu/lesson'
+
 // 导入样式
 import './index.less'
 
@@ -32,12 +33,12 @@ const layout = {
 class AddLesson extends Component {
   // 点击添加按钮,表单校验成功之后的回调函数
   onFinish = async values => {
-    console.log(values);
+    console.log(values)
 
     //要发送请求,添加课时
-    //问题:如何获取chapterId
+    // 问题: 如何获取chapterId
     const chapterId = this.props.location.state._id
-
+    // console.log(this.props)
     const data = {
       ...values,
       chapterId
@@ -66,20 +67,18 @@ class AddLesson extends Component {
           onFinish={this.onFinish}
           // 提交失败的时候会触发
           // onFinishFailed={onFinishFailed}
-          initialValues={
-            {
-              lesson: 'hello',
-              free: true
 
-            }
-          }
+          initialValues={{
+            // 键就是表单项的name属性的值
+            free: true
+          }}
         >
           {/* form表单中每一个表单项都需要使用Form.Item包裹 */}
           <Form.Item
             // 表示提示文字
             label='课时名称'
             // 表单项提交时的属性
-            name='lesson'
+            name='title'
             // 校验规则
             rules={[
               {
@@ -101,6 +100,7 @@ class AddLesson extends Component {
                 message: '请选择是否免费'
               }
             ]}
+            // 默认表单控制表单项的属性值是value,但是switch的值不是value,是checked,所以要改成checked
             valuePropName='checked'
           >
             <Switch
@@ -120,6 +120,7 @@ class AddLesson extends Component {
               }
             ]}
           >
+            {/* 上传逻辑复杂,所以封装到MyUpload中 */}
             <MyUpload></MyUpload>
           </Form.Item>
 

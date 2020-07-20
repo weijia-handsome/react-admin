@@ -56,10 +56,21 @@ export function reqUpdateSubjectList(title, id) {
     }
   })
 }
-//定义删除改课程分类title的方法
-export function reqDelSubject(id){
+
+// 定义删除改课程分类title的方法
+export function reqDelSubject(id) {
+  // request返回一个promise
   return request({
     url: `${BASE_URL}/remove/${id}`,
     method: 'DELETE'
+  })
+}
+
+// 获取所有一级课程分类数据
+export function reqALLSubjectList() {
+  // request返回一个promise
+  return request({
+    url: `${BASE_URL}`,
+    method: 'GET'
   })
 }

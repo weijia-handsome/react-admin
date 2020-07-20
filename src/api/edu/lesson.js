@@ -12,23 +12,36 @@ export function reqGetLessonList(chapterId) {
   })
 }
 
-//新增课时,上传视频,获取七牛云token的方法
-export function reqGetQiniuToken(){
+// 新增课时, 上传视频, 获取七牛云token的方法
+
+export function reqGetQiniuToken() {
   return request({
-    url:'/uploadtoken',
-    method:'GET'
+    url: '/uploadtoken',
+    method: 'GET'
   })
 }
-//新增课时
-export function reqAddLesson({ chapterId, title, free, video }){
+
+// 新增课时
+export function reqAddLesson({ chapterId, title, free, video }) {
   return request({
-    url:`${BASE_URL}/save`,
-    method:'POST',
-    data:{
+    url: `${BASE_URL}/save`,
+    method: 'POST',
+    data: {
       chapterId,
       title,
       free,
       video
+    }
+  })
+}
+
+// 批量删除课时
+export function reqBatchDelLesson(lessonIds) {
+  return request({
+    url: `${BASE_URL}/batchRemove`,
+    method: 'DELETE',
+    data: {
+      idList: lessonIds
     }
   })
 }

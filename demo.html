@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        async function charCountAdd(data1, data2) {
+    const d1=await charCount(data1);
+    const d2=await charCount(data2);
+    return d1+d2;
+}
+charCountAdd('Hello','Hi').then(console.log);//通过then获取异步函数的返回值。
+    </script>
+</body>
+</html>
