@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { loginSuccessSync } from '@redux/actions/login'
 import { connect } from 'react-redux'
 @connect
-export default class oauth extends Component {
+ class Oauth extends Component {
     componentDidMount() {
         //1.从浏览器地址栏把token的值切出来
         const token = window.location.search.split('=')[1]
@@ -23,3 +23,4 @@ export default class oauth extends Component {
         )
     }
 }
+export default Oauth
